@@ -1,21 +1,30 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class Boss : MonoBehaviour
 {
     [Header("Boss Status")]
-    public int maxHealth; // 3이 될 예정
-    public int curHealth;
+    [SerializeField]
+    private int maxHealth; // 3이 될 예정
+    private int curHealth;
+    [SerializeField]
     public int damage;
-    public int phase;
+    private int phase;
 
     [Header("Boss Attack")]
-    public GameObject player;
-    public GameObject meleeAttacker;
-    public GameObject fingerAttacker;
+    private GameObject player;
+    private GameObject[] Attackers;
+    [SerializeField]
+    private GameObject meleeAttacker;
+    [SerializeField]
+    private GameObject fingerAttacker;
     public GameObject fingerBullet;
-    public Transform fingerBulletSpawnPoint;
+    [SerializeField]
+    private Transform fingerBulletSpawnPoint;
+
     private Animator anim;
 
     public float curTime = 0;
@@ -26,14 +35,24 @@ public class Boss : MonoBehaviour
     private bool isAttack;
     private bool isDead = false;
     private bool isInvincible = true; // 보스가 공격 중이 아닌 경우 무적 상태
+    private bool isRepeating = true;
 
-    void Start()
+    void Awake()
     {
         player = GameObject.Find("Crimson");
-        curHealth = maxHealth;
         anim = GetComponent<Animator>();
-        InvokeRepeating(nameof(AttackMelee), 0f, updateInterval);
+
+        Init();
+
+        StartRepeatingTask(AttackMelee, 0f, updateInterval).Forget();
     }
+
+    void Init()
+    {
+        curHealth = maxHealth;
+
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -59,6 +78,28 @@ public class Boss : MonoBehaviour
         Vector3 newPosition = meleeAttacker.transform.position;
         newPosition.x = player.transform.position.x;
         meleeAttacker.transform.position = newPosition;
+
+    }
+
+    public async UniTaskVoid StartRepeatingTask(System.Action method, float initialDelay, float repeatInterval)
+    {
+        isRepeating = true;
+
+        // 처음 한 번의 지연
+        await UniTask.Delay(TimeSpan.FromSeconds(initialDelay));
+
+        // 반복적으로 호출
+        while (isRepeating)
+        {
+            method?.Invoke();  // 작업 실행
+            await UniTask.Delay(TimeSpan.FromSeconds(repeatInterval));  // 반복 지연
+        }
+    }
+
+    // 반복 작업을 중지하는 함수
+    public void StopRepeatingTask()
+    {
+        isRepeating = false;
     }
 
     void AttackMelee()
@@ -67,7 +108,8 @@ public class Boss : MonoBehaviour
         Debug.Log("Attack");
         isAttack = true;
         isInvincible = false; // 공격 시작 시 무적 상태 해제
-        Invoke("EndAttack", 2f); // 공격이 끝난 후 상태 초기화
+        // Invoke("EndAttack", 2f); // 공격이 끝난 후 상태 초기화
+        EndAttackVoid().Forget();
     }
 
     void FingerAttack()
@@ -77,13 +119,14 @@ public class Boss : MonoBehaviour
         countForAreaAttack++;
         isAttack = true;
         isInvincible = false; // 공격 시작 시 무적 상태 해제
-        Invoke("FingerAttackEnd", 2f);
+        FingerAttackEndVoid().Forget();
     }
 
-    void FingerAttackEnd()
+    private async UniTaskVoid FingerAttackEndVoid()
     {
+        await UniTask.Delay(TimeSpan.FromSeconds(2f));
         fingerAttacker.SetActive(false);
-        EndAttack(); // 공격 종료 처리
+        EndAttack();
     }
 
     public void CreateFingerBullet()
@@ -100,11 +143,13 @@ public class Boss : MonoBehaviour
         isAttack = true;
         anim.SetTrigger("AreaAttack");
         countForAreaAttack = 0;
-        Invoke("AreaAttackEnd", 2f);
+        // Invoke("AreaAttackEnd", 2f);
+        AreaAttackEndVoid().Forget();
     }
 
-    void AreaAttackEnd()
+    private async UniTaskVoid AreaAttackEndVoid()
     {
+        await UniTask.Delay(TimeSpan.FromSeconds(2f));
         phase++;
         EndAttack(); // 공격 종료 처리
     }
@@ -132,6 +177,7 @@ public class Boss : MonoBehaviour
     {
         anim.SetBool("IsDead", true);
         isDead = true;
+        StopRepeatingTask();
         // 'IsDead' 애니메이션이 종료된 후 오브젝트를 파괴하기 위해 Invoke 사용
         Invoke("DestroyBoss", anim.GetCurrentAnimatorStateInfo(0).length); // 현재 애니메이션의 길이를 얻어와 그 후에 파괴
     }
@@ -143,6 +189,13 @@ public class Boss : MonoBehaviour
 
     void EndAttack()
     {
+        isAttack = false;
+        isInvincible = true; // 공격 종료 시 무적 상태 설정
+    }
+
+    private async UniTaskVoid EndAttackVoid()
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(2f));
         isAttack = false;
         isInvincible = true; // 공격 종료 시 무적 상태 설정
     }

@@ -7,6 +7,11 @@ public class HUDController : Observer
     private PlayerMove _playerMove;
     public Text HealthUI;
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
+
     public override void Notify(Subject subject)
     {
         if (!_playerMove)
