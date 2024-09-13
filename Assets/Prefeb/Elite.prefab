@@ -27,7 +27,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 199807334770918718}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -111,9 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce73e437e8ef0584fb99af9ada99d352, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyType: 1
-  maxHealth: 10
-  curHealth: 10
+  enemyData: {fileID: 11400000, guid: 83c3353fe32df4714a8f183ff97c340f, type: 2}
   player: {fileID: 0}
   nextMove: 0
   runSpeed: 2
@@ -123,6 +121,7 @@ MonoBehaviour:
   curTime: 0
   coolTime: 1
   shootRange: 2
+  isDying: 0
   shellPrefab: {fileID: 5794207492524678974, guid: 076a884969a58974398b2c6129e349f8, type: 3}
   shellPos: {fileID: 3730069129864747814}
   plusyValue: 2.5

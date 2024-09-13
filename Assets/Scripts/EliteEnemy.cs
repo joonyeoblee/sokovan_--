@@ -5,13 +5,15 @@ using UnityEngine;
 public class EliteEnemy : Enemy
 {
     [Header("Enemy Attack")]
-    public GameObject shellPrefab;
-    public Transform shellPos;
-    public float plusyValue;
+    [SerializeField]
+    private GameObject shellPrefab;
+    [SerializeField]
+    private Transform shellPos;
+
     void Start()
     {
-        enemyType = Type.elite;
-        plusy = plusyValue;
+        // enemyType = E.elite;
+        Init();
 
         rigid = GetComponent<Rigidbody2D>();
         anim = GetComponentInChildren<Animator>();
@@ -49,7 +51,7 @@ public class EliteEnemy : Enemy
     {
 
         if (!IsOnGround) return;
-        transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, transform.position.y), runSpeed * Time.deltaTime);
+        transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, transform.position.y), enemyData.runSpeed * Time.deltaTime);
 
         anim.SetBool("run", true);
         anim.SetBool("walk", false);

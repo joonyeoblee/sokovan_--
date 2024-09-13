@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 7759051448240612542}
   - component: {fileID: 1648140657592646810}
   - component: {fileID: 6255722695514228123}
-  - component: {fileID: 113217080780092545}
   - component: {fileID: 3568004221803920017}
   - component: {fileID: 1917848895253601749}
   m_Layer: 10
@@ -114,8 +113,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40b26a37da3cb483daea4a90154f1b50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hudController: {fileID: 0}
-  playerAnimationController: {fileID: 113217080780092545}
   jump_power: 23
   curlup_power: -10
   maxHealth: 99
@@ -133,35 +130,6 @@ MonoBehaviour:
   speed: 10
   bossFingerBullet: {fileID: 6331806386674652537, guid: dd131d9090d9444eba065693a498fce4, type: 3}
   isJump: 0
---- !u!114 &113217080780092545
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1054036734437768731}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e08e08d08e8644c21b5845362d6a1a8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  IDLE: NewCrimson_Idle
-  WALK: NewCrimson_Walk
-  RUN: NewCrimson_Walk
-  JUMP_UP: NewCrimson_Jump_Up
-  JUMP_DOWN: NewCrimson_Jump_Down
-  CURLUP_UP: NewCrimson_Jump_Up
-  CURLUP_DOWN: NewCrimson_Jump_Down
-  ATTACK1: NewCrimson_Attack1
-  ATTACK2: NewCrimson_Attack2
-  ATTACK3: NewCrimson_Attack3
-  ATTACK4: NewCrimson_Attack4
-  AIRATK1: NewCrimson_AirAttack1
-  AIRATK2: NewCrimson_AirAttack2
-  AIRATK3: NewCrimson_AirAttack3
-  PARRY: NewCrimson_Parrying
-  GETDAMAGE: NewCrimson_Damaged
-  DeadAni: NewCrimson_Dead
 --- !u!251 &3568004221803920017
 PlatformEffector2D:
   m_ObjectHideFlags: 0

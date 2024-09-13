@@ -27,10 +27,12 @@ public class Boss : MonoBehaviour
 
     private Animator anim;
 
-    public float curTime = 0;
-    public float coolTime;
-    public float updateInterval = 2f; // 업데이트 간격 (초)
-    public int countForAreaAttack = 0;
+    private float curTime = 0;
+    [SerializeField]
+    private float coolTime;
+
+    private float updateInterval = 2f; // 업데이트 간격 (초)
+    private int countForAreaAttack = 0;
 
     private bool isAttack;
     private bool isDead = false;
@@ -166,7 +168,7 @@ public class Boss : MonoBehaviour
             }
             else
             {
-                anim.SetTrigger("Damaged");
+                anim.SetTrigger("Hurt");
                 isInvincible = true; // 데미지를 입었을 때 무적 상태 설정
                 phase++;
             }

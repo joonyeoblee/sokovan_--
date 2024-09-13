@@ -10,12 +10,11 @@ public class NormalEnemy : Enemy
     public GameObject StunbulletPrefab;
     public Transform bulletPos;
     private bool isStunGun = false;
-    public float plusyValue;
 
     void Start()
     {
-        enemyType = Type.normal;
-        plusy = plusyValue;
+        // enemyType = Type.normal;
+        Init();
 
         rigid = GetComponent<Rigidbody2D>();
         anim = GetComponentInChildren<Animator>();
@@ -97,7 +96,7 @@ public class NormalEnemy : Enemy
     {
         if (!IsOnGround) return;
 
-        transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, transform.position.y), runSpeed * Time.deltaTime);
+        transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, transform.position.y), enemyData.runSpeed * Time.deltaTime);
 
         anim.SetBool("run", true);
         anim.SetBool("walk", false);
@@ -113,7 +112,7 @@ public class NormalEnemy : Enemy
         }
         else
         {
-            transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, transform.position.y), -runSpeed * 0.5f * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, new Vector2(player.transform.position.x, transform.position.y), -enemyData.runSpeed * 0.5f * Time.deltaTime);
             anim.SetBool("run", true);
             anim.SetBool("walk", false);
         }
@@ -150,6 +149,7 @@ public class NormalEnemy : Enemy
     {
         GameObject bullet = Instantiate(bulletPrefab, bulletPos.position, bulletPos.rotation);
 
+        // 몬스터의 방향에 따라 총알을 flip
         if (transform.localScale.x < 0)
         {
             bullet.GetComponentInChildren<SpriteRenderer>().flipX = true;

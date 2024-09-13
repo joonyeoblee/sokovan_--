@@ -4,19 +4,14 @@ using UnityEngine;
 
 public abstract class Enemy : MonoBehaviour
 {
-    public enum Type { normal, elite, boss };
-    public Type enemyType;
-    public int maxHealth;
-    public int curHealth;
-    public GameObject player;
-    public int nextMove;
-    public float runSpeed;
-    public float FrontDetectionRange;
-    public float BackDetectionRange;
-    public float intervalTime;
+    [SerializeField]
+    protected EnemyData enemyData;
+    int curHealth;
+    protected GameObject player;
+    int nextMove;
     private string curState;
-    public float curTime = 0;
-    public float coolTime;
+    protected float curTime = 0;
+    protected float coolTime;
     public float shootRange;
     protected float plusy;
     protected float count = 0;
@@ -38,13 +33,20 @@ public abstract class Enemy : MonoBehaviour
     protected bool IsOnGround;
 
 
-
+    protected void Init()
+    {
+        player = GameManager.instance.player;
+        curHealth = enemyData.maxHealth;
+        coolTime = enemyData.coolTime;
+        shootRange = enemyData.shootRange;
+        plusy = enemyData.plusy;
+    }
 
     protected virtual void DetectPlayer()
     {
         // 감지 영역 설정
 
-        float detectionRadius = FrontDetectionRange; // 적당한 감지 반경 설정
+        float detectionRadius = enemyData.FrontDetectionRange; // 적당한 감지 반경 설정
         Vector2 detectionCenter = new Vector2(transform.position.x, transform.position.y + plusy);
 
         // 감지 영역 내의 모든 콜라이더 검사
@@ -66,7 +68,7 @@ public abstract class Enemy : MonoBehaviour
     {
         Vector2 detectionCenter2 = new Vector2(transform.position.x, transform.position.y + plusy);
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(detectionCenter2, FrontDetectionRange);
+        Gizmos.DrawWireSphere(detectionCenter2, enemyData.FrontDetectionRange);
         // 초록색 으로 총 범위 추가해야함.
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(detectionCenter2, shootRange);
@@ -77,7 +79,7 @@ public abstract class Enemy : MonoBehaviour
     protected virtual void Think()
     {
         nextMove = Random.Range(-1, 2);
-        Invoke("Think", intervalTime);
+        Invoke("Think", enemyData.intervalTime);
 
     }
 
@@ -117,7 +119,7 @@ public abstract class Enemy : MonoBehaviour
             transform.localScale = new Vector3(direction.x > 0 ? -1 : 1, 1, 1);
 
 
-            if (distanceToPlayer > shootRange && distanceToPlayer < FrontDetectionRange)
+            if (distanceToPlayer > shootRange && distanceToPlayer < enemyData.FrontDetectionRange)
             {
                 transform.Translate(Vector2.zero);
                 if (curTime <= 0 && !isAttack)
@@ -184,7 +186,7 @@ public abstract class Enemy : MonoBehaviour
                 nextMove = -nextMove;
             }
             {
-                transform.Translate(Vector2.left * nextMove * runSpeed * 0.4f * Time.deltaTime);
+                transform.Translate(Vector2.left * nextMove * enemyData.runSpeed * 0.4f * Time.deltaTime);
                 transform.localScale = new Vector2(nextMove > 0 ? 1 : -1, 1);
             }
 
@@ -212,11 +214,11 @@ public abstract class Enemy : MonoBehaviour
         AttackComplete();
     }
 
-
     protected virtual void AttackComplete()
     {
         isAttack = false;
     }
+
     public void OnDamage(int attackDamage)
     {
         if (isDying) return;
