@@ -5,7 +5,8 @@ public class HUDController : Observer
 {
     private float _currentHealth;
     private PlayerMove _playerMove;
-    public Text HealthUI;
+    [SerializeField]
+    private Text HealthUI;
 
     private void Awake()
     {

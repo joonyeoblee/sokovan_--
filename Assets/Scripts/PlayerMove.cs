@@ -9,8 +9,8 @@ public class PlayerMove : Subject
     SpriteRenderer[] spriteRenderers;
     Animator anim;
     CapsuleCollider2D capsuleCollider;
-    public HUDController _hudController;
-    public PlayerAnimationController playerAnimationController;
+    [SerializeField]
+    private HUDController _hudController;
 
     public int jump_power = 23;
     public int curlup_power = -10;
@@ -33,6 +33,9 @@ public class PlayerMove : Subject
     [Header("Bullet")]
     public GameObject bossFingerBullet;
 
+
+
+
     private string curState;
     private int attackStack;
     private int runSpeed;
@@ -48,6 +51,24 @@ public class PlayerMove : Subject
 
     private bool isParry;
 
+    const string IDLE = "NewCrimson_Idle";
+    const string WALK = "NewCrimson_Walk";
+    const string RUN = "NewCrimson_Walk";
+    const string JUMP_UP = "NewCrimson_Jump_Up";
+    const string JUMP_DOWN = "NewCrimson_Jump_Down";
+    const string CURLUP_UP = "NewCrimson_Jump_Up";
+    const string CURLUP_DOWN = "NewCrimson_Jump_Down";
+    const string ATTACK1 = "NewCrimson_Attack1";
+    const string ATTACK2 = "NewCrimson_Attack2";
+    const string ATTACK3 = "NewCrimson_Attack3";
+    const string ATTACK4 = "NewCrimson_Attack4";
+    const string AIRATK1 = "NewCrimson_AirAttack1";
+    const string AIRATK2 = "NewCrimson_AirAttack2";
+    const string AIRATK3 = "NewCrimson_AirAttack3";
+    const string Parry = "NewCrimson_Parrying";
+    const string GETDAMAGE = "NewCrimson_Damaged";
+    const string DeadAni = "NewCrimson_Dead";
+
 
     void Awake()
     {
@@ -55,14 +76,19 @@ public class PlayerMove : Subject
         UnityEngine.Rendering.DebugManager.instance.enableRuntimeUI = false;
 
         rigid = GetComponent<Rigidbody2D>();
-        spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
-        playerAnimationController = GetComponent<PlayerAnimationController>();
+        // 자식에서 spriteRenderer를 가져오기 위해 GetComponentInChildren 사용해야함.
+        // spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
-        // anim = GetComponent<Animator>();
+        // 자식에서 spriteRenderer를 가져오기 위해 GetComponentsInChildren 사용해야함.
+        spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+
+        anim = GetComponent<Animator>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
 
         attackStack = 0;
+        //walkSpeed = 3;
         runSpeed = 6;
+
         curHealth = maxHealth;
 
         isJump = false;
@@ -91,7 +117,7 @@ public class PlayerMove : Subject
 
     void Update()
     {
-        if (!isIdleState()) return;
+
 
         float horiz = Input.GetAxis("Horizontal");
         if (horiz == 0 && !isAttack)
@@ -103,7 +129,6 @@ public class PlayerMove : Subject
         //일반 공격(Attack)
         if (Input.GetKeyDown(KeyCode.J))
         {
-            if (isStun) return;
             if (isJump == true && !isAttackState())
                 AirAttack();
             else if (isIdleState())
@@ -118,12 +143,12 @@ public class PlayerMove : Subject
         //1번 스킬(Skill1)
         if (Input.GetKeyDown(KeyCode.K))
         {
-            if (isStun) return;
             if (isIdleState())
             {
                 isParry = true;
                 isAttack = true;
-                playerAnimationController.ChangeAnimation(playerAnimationController.PARRY);
+                ChangeAnimation(Parry);
+                // Parrying();
                 Invoke("AttackComplete", 0.4f);
             }
         }
@@ -131,7 +156,6 @@ public class PlayerMove : Subject
         //점프(Jump)
         if (Input.GetKey(KeyCode.W) && isIdleState())
         {
-            if (isStun) return;
             Jump();
             isJump = true;
         }
@@ -139,23 +163,44 @@ public class PlayerMove : Subject
         //스프라이트 좌우 바꾸기(Sprite X reverse)
         if (Input.GetButton("Horizontal") && !isAttackState() && !isStun)
         {
-            if (isStun) return;
-
             bool isLeft = Input.GetAxisRaw("Horizontal") == -1;
+            // foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+            // {
+            //     spriteRenderer.flipX = isLeft;
+            // }
+
+            // // attackPoint 위치 변경
+            // attackPoint.localPosition = new Vector3(isLeft ? -1f : 1f, attackPoint.localPosition.y, attackPoint.localPosition.z);
+            // Debug.Log(isLeft);
+            // Debug.Log(attackPoint.localPosition);
             transform.localScale = new Vector3(isLeft ? -1 : 1, 1, 1); //Flip X
 
         }
 
-        //걷기 & 달리기 애니메이션(Walk & Run animatoration)
-        if (Mathf.Abs(rigid.velocity.x) > 2)
+        if (isIdleState())
         {
-            playerAnimationController.ChangeAnimation(playerAnimationController.RUN);
-        }
-        else
-        {
-            playerAnimationController.ChangeAnimation(playerAnimationController.IDLE);
+            //걷기 & 달리기 애니메이션(Walk & Run animatoration)
+            if (Mathf.Abs(rigid.velocity.x) > 2)
+            {
+                ChangeAnimation(RUN);
+            }
+            /*
+            else if(Mathf.Abs(rigid.velocity.x) > 2) {
+                ChangeAnimation(WALK);
+            }
+            */
+            else
+            {
+                ChangeAnimation(IDLE);
+            }
         }
 
+        // // 웅크리기
+        // if (Input.GetKey(KeyCode.S) && isIdleState())
+        // {
+        //     isCurlUp = true;
+        //     CurlUp();
+        // }
     }
 
     void FixedUpdate()
@@ -183,7 +228,12 @@ public class PlayerMove : Subject
             isFall = true;
 
 
-            Vector2 downVec = new Vector2(rigid.position.x, rigid.position.y); ;
+            Vector2 downVec = new Vector2(rigid.position.x, rigid.position.y);
+            /*
+            Debug.DrawRay(downVec, Vector3.down, new Color(1, 0, 0));
+            RaycastHit2D RayHit = Physics2D.Raycast(downVec, Vector3.down, 1, LayerMask.GetMask("Floor"));
+            */
+            //Debug.DrawRay(downVec, Vector3.down, new Color(1, 0, 0));
             RaycastHit2D RayHit = Physics2D.BoxCast(downVec, capsuleCollider.bounds.size, 0f, Vector2.down, 0.1f, LayerMask.GetMask("Floor"));
             Debug.DrawRay(downVec, Vector3.down * 0.1f, new Color(1, 0, 0));
 
@@ -196,21 +246,23 @@ public class PlayerMove : Subject
                     if (isAirAttack == true)
                     {
 
-                        playerAnimationController.ChangeAnimation(playerAnimationController.AIRATK3);
+                        ChangeAnimation(AIRATK3);
+                        //rigid.velocity = new Vector2(rigid.velocity.x, -5);
                         Invoke("AttackComplete", 0.25f);
                     }
 
+                    //isAirAttack = false;
                 }
             }
             else
             {
                 if (isAirAttack)
                 {
-                    playerAnimationController.ChangeAnimation(playerAnimationController.AIRATK2);
+                    ChangeAnimation(AIRATK2);
                 }
                 else
                 {
-                    playerAnimationController.ChangeAnimation(playerAnimationController.JUMP_DOWN);
+                    ChangeAnimation(JUMP_DOWN);
                 }
             }
         }
@@ -230,6 +282,8 @@ public class PlayerMove : Subject
     {
         if (other.gameObject.tag == "TrapDoor")
         {
+            // if (transform.position.y > other.transform.position.y && isAirAttack == true)
+            //     OnDestroyObj("TrapDoor", other.transform);
             Debug.Log("TrapDoor");
             GameManager trapDoor = other.GetComponent<GameManager>();
             trapDoor.LoadBossScene();
@@ -276,7 +330,7 @@ public class PlayerMove : Subject
                 objectCtrl.TrapDoorDestroy();
                 break;
             case "Door":
-                Debug.Log("It's Door");
+                Debug.Log("hello");
                 break;
         }
     }
@@ -285,7 +339,7 @@ public class PlayerMove : Subject
     private void Jump()
     {
         rigid.velocity = new Vector2(rigid.velocity.x, jump_power);
-        playerAnimationController.ChangeAnimation(playerAnimationController.JUMP_UP);
+        ChangeAnimation(JUMP_UP);
     }
 
 
@@ -294,7 +348,7 @@ public class PlayerMove : Subject
     {
         isCurlUp = true;
         StartCoroutine(AdjustColliderForCurlUpGradually());
-        playerAnimationController.ChangeAnimation(playerAnimationController.CURLUP_DOWN);
+        ChangeAnimation(CURLUP_DOWN);
     }
 
     IEnumerator AdjustColliderForCurlUpGradually()
@@ -333,7 +387,7 @@ public class PlayerMove : Subject
     {
         isCurlUp = false;
         ResetCollider();
-        playerAnimationController.ChangeAnimation(playerAnimationController.IDLE);
+        ChangeAnimation(IDLE);
     }
 
     // 원래 콜라이더 사이즈 및 오프셋으로 되돌림
@@ -351,11 +405,17 @@ public class PlayerMove : Subject
         switch (attackStack)
         {
             case 0:
-                playerAnimationController.ChangeAnimation(playerAnimationController.ATTACK1);
+                ChangeAnimation(ATTACK1);
                 break;
             case 1:
-                playerAnimationController.ChangeAnimation(playerAnimationController.ATTACK2);
+                ChangeAnimation(ATTACK2);
                 break;
+                // case 2:
+                //     ChangeAnimation(ATTACK1);
+                //     break;
+                // case 3:
+                //     ChangeAnimation(ATTACK4);
+                //     break;
         }
         //공격하면 공격하는 방향으로 조금씩 이동(If you attack, move little by little in the direction of attack)
         if (transform.localScale.x == -1)
@@ -371,8 +431,13 @@ public class PlayerMove : Subject
             if (enemy.CompareTag("Enemy"))
             {
                 Debug.Log("We Hit " + enemy.name);
-                if (enemy.GetComponent<Enemy>().isDying == false)
-                    enemy.GetComponent<Enemy>().OnDamage(attackDamage);
+
+                //만약 enemy에 Enemy 스크립트가 있으면 공격
+                if (enemy.GetComponent<Enemy>() != null)
+                {
+                    if (enemy.GetComponent<Enemy>().isDying == false)
+                        enemy.GetComponent<Enemy>().OnDamage(attackDamage);
+                }
             }
 
             if (enemy.CompareTag("Boss"))
@@ -389,27 +454,99 @@ public class PlayerMove : Subject
         }
 
         if (attackStack == 1)
+            //Invoke("AttackComplete", 0.238f);
+            //Invoke("AttackComplete", 0.22f);
             Invoke("AttackComplete", shortDelay);
         else
+            //Invoke("AttackComplete", 0.357f);
+            //Invoke("AttackComplete", 0.34f);
             Invoke("AttackComplete", longDelay);
         attackStack++;
     }
 
     //공중 공격(Air Attack)
+    // private void AirAttack()
+    // {
+    //     isAirAttack = true;
+    //     rigid.velocity = new Vector2(0, 13);
+    //     ChangeAnimation(AIRATK1);
+    //     Invoke("AirFall", 0.3f);
+    //     //Debug.Log("AirAttack");
+    //     Collider2D[] damagedEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemies);
+    //     foreach (Collider2D enemy in damagedEnemies)
+    //     {
+    //         if (enemy.CompareTag("Enemy"))
+    //         {
+
+    //             Debug.Log("We use air attack to Hit " + enemy.name);
+    //             if (enemy.GetComponent<Enemy>() != null)
+    //             {
+    //                 if (enemy.GetComponent<Enemy>().isDying == false)
+    //                     enemy.GetComponent<Enemy>().OnDamage(attackDamage);
+    //             }
+    //         }
+
+    //         if (enemy.CompareTag("Boss"))
+    //         {
+    //             Debug.Log("Hit Boss");
+    //             enemy.GetComponent<Boss>().OnDamage();
+    //         }
+
+    //     }
+    // }
+
+    // //공중 공격을 실행하면 빠르게 낙하(Drop quickly when you run 'AirAttack')
+    // void AirFall()
+    // {
+    //     rigid.velocity = new Vector2(rigid.velocity.x, -20);
+
+    // }
     private void AirAttack()
     {
         isAirAttack = true;
         rigid.velocity = new Vector2(0, 13);
-        playerAnimationController.ChangeAnimation(playerAnimationController.AIRATK1);
+        ChangeAnimation(AIRATK1);
         Invoke("AirFall", 0.3f);
         //Debug.Log("AirAttack");
+        int isAirHit = 0;
+
+        while (isAirHit == 0)
+        {
+            isAirHit = CheckForHit();
+        }
+
     }
 
-    //공중 공격을 실행하면 빠르게 낙하(Drop quickly when you run 'AirAttack')
+
+    private int CheckForHit()
+    {
+        Collider2D[] damagedEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemies);
+        // 콜라이더에 enter를 감지
+        foreach (Collider2D enemy in damagedEnemies)
+        {
+            if (enemy.CompareTag("Enemy"))
+            {
+                Debug.Log("We use air attack to Hit " + enemy.name);
+                if (enemy.GetComponent<Enemy>() != null)
+                {
+                    if (enemy.GetComponent<Enemy>().isDying == false)
+                        enemy.GetComponent<Enemy>().OnDamage(attackDamage);
+
+                    return 2;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    // 공중 공격을 실행하면 빠르게 낙하(Drop quickly when you run 'AirAttack')
     void AirFall()
     {
         rigid.velocity = new Vector2(rigid.velocity.x, -20);
     }
+
+
 
     //스킬1 : 혈포
     void Skill1_BloodCannon()
@@ -431,7 +568,8 @@ public class PlayerMove : Subject
 
     void Dead()
     {
-        playerAnimationController.ChangeAnimation(playerAnimationController.DeadAni);
+        ChangeAnimation(DeadAni);
+        Destroy(gameObject, 1.5f);
     }
 
     //공격 끝(Attack Complete)
@@ -444,7 +582,7 @@ public class PlayerMove : Subject
     //가만히 있는 상태인지 체크(Check wether state is 'idle')
     public bool isIdleState()
     {
-        return !(isJump || isAttack || isFall || isAirAttack || isDamaged || isCurlUp || isHitOn || isParry || isStun);
+        return !(isJump || isAttack || isFall || isAirAttack || isDamaged || isCurlUp);
     }
 
 
@@ -460,6 +598,17 @@ public class PlayerMove : Subject
             return;
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
+
+    //움직임에 따라 애니메이션 전환(Change animation based on current state)
+    void ChangeAnimation(string newState)
+    {
+        if (curState == newState)
+        {
+            return;
+        }
+        anim.Play(newState);
+    }
+
 
     public void Parrying()
     {
@@ -479,9 +628,9 @@ public class PlayerMove : Subject
     public void Damaged(int damage) // 매개변수 추가해야함
     {
         // curHealth -= damage;
-        playerAnimationController.ChangeAnimation(playerAnimationController.GETDAMAGE);
+        ChangeAnimation(GETDAMAGE);
         isDamaged = true;
-        StartCoroutine(DamagedComplete());
+        Invoke("DamagedComplete", 0.5f);
         curHealth -= damage; // damage 매개변수 추가해야함
 
         NotifyObservers();
@@ -491,21 +640,18 @@ public class PlayerMove : Subject
             curHealth = 0;
             Dead();
         }
+
     }
 
-    //피격 애니메이션 끝(Damaged animation complete)
-    IEnumerator DamagedComplete()
-    {
 
-        playerAnimationController.ChangeAnimation(playerAnimationController.IDLE);
-        yield return new WaitForSeconds(0.5f);
+
+    //피격 애니메이션 끝(Damaged animation complete)
+    void DamagedComplete()
+    {
+        ChangeAnimation(IDLE);
         isDamaged = false;
 
     }
 
-    void SetActiveFalse()
-    {
-        gameObject.SetActive(false);
-    }
 
 }
