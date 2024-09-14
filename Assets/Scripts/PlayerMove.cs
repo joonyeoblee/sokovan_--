@@ -330,7 +330,7 @@ public class PlayerMove : Subject
                 objectCtrl.TrapDoorDestroy();
                 break;
             case "Door":
-                Debug.Log("hello");
+                Debug.Log("Door");
                 break;
         }
     }

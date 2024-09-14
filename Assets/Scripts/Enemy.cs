@@ -2,7 +2,7 @@ using System.Collections;
 using Lightbug.Utilities;
 using UnityEngine;
 
-public abstract class Enemy : MonoBehaviour
+public abstract class Enemy : MonoBehaviour, IMoveable, IChaseable
 {
     [SerializeField]
     protected EnemyData enemyData;
@@ -42,7 +42,7 @@ public abstract class Enemy : MonoBehaviour
         plusy = enemyData.plusy;
     }
 
-    protected virtual void DetectPlayer()
+    public void DetectPlayer()
     {
         // 감지 영역 설정
 
@@ -76,15 +76,14 @@ public abstract class Enemy : MonoBehaviour
     }
 
     // 대기 상태일 때 몬스터 이동 선택 로직
-    protected virtual void Think()
+    // 명시적 인터페이스 구현
+    public void Think()
     {
         nextMove = Random.Range(-1, 2);
         Invoke("Think", enemyData.intervalTime);
-
     }
 
-
-    protected virtual void MoveEnemy()
+    public void Move()
     {
         rigid.velocity = new Vector2(nextMove, rigid.velocity.y);
 
@@ -285,6 +284,4 @@ public abstract class Enemy : MonoBehaviour
             yield return new WaitForSeconds(1f); // 1초 기다림
         }
     }
-
-
 }

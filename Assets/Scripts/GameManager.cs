@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
+
         if (instance == null)
         {
             instance = this;

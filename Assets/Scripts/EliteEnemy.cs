@@ -27,7 +27,7 @@ public class EliteEnemy : Enemy
         if (!isDying)
         {
             DetectPlayer();
-            MoveEnemy();
+            Move();
         }
     }
     protected override void AttackLogic()

@@ -5969,6 +5969,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Crimson
       objectReference: {fileID: 0}
+    - target: {fileID: 1054036734437768731, guid: 57bcc0e1e6c20aa4289d286b954f634b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6255722695514228123, guid: 57bcc0e1e6c20aa4289d286b954f634b, type: 3}
       propertyPath: _hudController
       value: 

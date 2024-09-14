@@ -6,9 +6,12 @@ public class NormalEnemy : Enemy
 {
 
     [Header("Enemy Attack")]
-    public GameObject bulletPrefab;
-    public GameObject StunbulletPrefab;
-    public Transform bulletPos;
+    [SerializeField]
+    private GameObject bulletPrefab;
+    [SerializeField]
+    private GameObject StunbulletPrefab;
+    [SerializeField]
+    private Transform bulletPos;
     private bool isStunGun = false;
 
     void Start()
@@ -29,7 +32,7 @@ public class NormalEnemy : Enemy
         if (!isDying)
         {
             DetectPlayer();
-            MoveEnemy();
+            Move();
         }
     }
 
