@@ -47,7 +47,7 @@ public abstract class Enemy : MonoBehaviour, IMoveable, IChaseable
         // 감지 영역 설정
 
         float detectionRadius = enemyData.FrontDetectionRange; // 적당한 감지 반경 설정
-        Vector2 detectionCenter = new Vector2(transform.position.x, transform.position.y + plusy);
+        Vector2 detectionCenter = new Vector2(transform.position.x, transform.position.y + enemyData.plusy);
 
         // 감지 영역 내의 모든 콜라이더 검사
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(detectionCenter, detectionRadius, LayerMask.GetMask("Player"));

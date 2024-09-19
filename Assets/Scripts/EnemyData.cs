@@ -15,7 +15,6 @@ public class EnemyData : ScriptableObject
     public float coolTime;
     public float shootRange;
     public int damage;
-    public float attackRange;
 
     [Header("Enemy Attack")]
     public float plusy;
