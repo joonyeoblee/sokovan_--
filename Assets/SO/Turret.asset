@@ -14,10 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 5
   runSpeed: 0
-  FrontDetectionRange: 10
+  FrontDetectionRange: 6
   intervalTime: 0
   coolTime: 2
-  shootRange: 0
+  shootRange: 5
   damage: 1
-  attackRange: 0
   plusy: 0
